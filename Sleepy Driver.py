@@ -19,7 +19,7 @@ if sys.platform != "darwin":
 
 BASE_DIR = Path(__file__).resolve().parent
 MODEL_DIR = BASE_DIR / "models"
-FACE_CASCADE_PATH = Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
+FACE_CASCADE_PATH = MODEL_DIR / "haarcascade_frontalface_default.xml"
 PREDICTOR_PATH = MODEL_DIR / "shape_predictor_68_face_landmarks.dat"
 ALARM_PATH = BASE_DIR / "alarm.wav"
 
@@ -53,7 +53,9 @@ def eye_aspect_ratio(eye) -> float:
 def main() -> None:
     if not FACE_CASCADE_PATH.is_file():
         raise FileNotFoundError(
-            f"OpenCV Haar cascade not found: {FACE_CASCADE_PATH}"
+            "Missing OpenCV Haar cascade. Download "
+            "'haarcascade_frontalface_default.xml' into the 'models' folder. "
+            f"Expected location: {FACE_CASCADE_PATH}"
         )
     if not PREDICTOR_PATH.is_file():
         raise FileNotFoundError(
