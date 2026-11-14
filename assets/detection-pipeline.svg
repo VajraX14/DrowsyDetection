@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="600" viewBox="0 0 1200 600" role="img" aria-labelledby="title desc">
+<title id="title">Drowsy Detection processing pipeline</title>
+<desc id="desc">Webcam frames are resized and converted to grayscale, faces are detected, facial landmarks are extracted, eye aspect ratio is calculated, and sustained low values trigger a visual and audio alert.</desc>
+<defs>
+  <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#101827"/><stop offset="1" stop-color="#172b3d"/></linearGradient>
+  <linearGradient id="accent" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#22c1a6"/><stop offset="1" stop-color="#48a6f5"/></linearGradient>
+  <marker id="arrow" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0 0 L0 6 L8 3 z" fill="#8ba5bc"/></marker>
+  <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="5" stdDeviation="7" flood-color="#000" flood-opacity=".2"/></filter>
+</defs>
+<rect width="1200" height="600" rx="28" fill="url(#bg)"/>
+<text x="60" y="64" font-family="Arial,sans-serif" font-size="16" font-weight="700" letter-spacing="3" fill="#71d9ca">REAL-TIME COMPUTER VISION</text>
+<text x="60" y="108" font-family="Arial,sans-serif" font-size="34" font-weight="700" fill="#f3f7fb">From webcam frame to drowsiness alert</text>
+<text x="60" y="140" font-family="Arial,sans-serif" font-size="17" fill="#a8bdce">OpenCV face detection · dlib landmarks · Eye Aspect Ratio (EAR)</text>
+<g font-family="Arial,sans-serif" text-anchor="middle" filter="url(#shadow)">
+  <g><rect x="55" y="210" width="190" height="132" rx="16" fill="#20384b" stroke="#4d7188"/><circle cx="150" cy="253" r="24" fill="none" stroke="#54c8ba" stroke-width="4"/><path d="M113 293 Q150 264 187 293" fill="none" stroke="#54c8ba" stroke-width="4" stroke-linecap="round"/><text x="150" y="322" font-size="18" font-weight="700" fill="#fff">Webcam</text></g>
+  <g><rect x="285" y="210" width="190" height="132" rx="16" fill="#20384b" stroke="#4d7188"/><rect x="355" y="231" width="50" height="42" rx="5" fill="none" stroke="#65b8f0" stroke-width="3"/><path d="M365 241h30M365 250h30M365 259h18" stroke="#65b8f0" stroke-width="3"/><text x="380" y="300" font-size="17" font-weight="700" fill="#fff">Pre-process</text><text x="380" y="322" font-size="13" fill="#aac0d1">Resize · grayscale</text></g>
+  <g><rect x="515" y="210" width="190" height="132" rx="16" fill="#20384b" stroke="#4d7188"/><path d="M575 246 Q610 218 645 246 Q610 274 575 246Z" fill="none" stroke="#65b8f0" stroke-width="3"/><circle cx="610" cy="246" r="9" fill="none" stroke="#65b8f0" stroke-width="3"/><text x="610" y="300" font-size="17" font-weight="700" fill="#fff">Detect &amp; locate</text><text x="610" y="322" font-size="13" fill="#aac0d1">Face + 68 landmarks</text></g>
+  <g><rect x="745" y="210" width="190" height="132" rx="16" fill="#20384b" stroke="#4d7188"/><path d="M800 250 Q840 218 880 250 Q840 282 800 250Z" fill="none" stroke="#54c8ba" stroke-width="3"/><circle cx="800" cy="250" r="4" fill="#f7c86b"/><circle cx="820" cy="230" r="4" fill="#f7c86b"/><circle cx="860" cy="230" r="4" fill="#f7c86b"/><circle cx="880" cy="250" r="4" fill="#f7c86b"/><circle cx="860" cy="270" r="4" fill="#f7c86b"/><circle cx="820" cy="270" r="4" fill="#f7c86b"/><text x="840" y="300" font-size="17" font-weight="700" fill="#fff">Calculate EAR</text><text x="840" y="322" font-size="13" fill="#aac0d1">Average both eyes</text></g>
+  <g><rect x="975" y="210" width="170" height="132" rx="16" fill="#20384b" stroke="#4d7188"/><path d="M1038 236h44M1060 218v36" stroke="#f7c86b" stroke-width="3" stroke-linecap="round"/><text x="1060" y="290" font-size="17" font-weight="700" fill="#fff">Threshold</text><text x="1060" y="314" font-size="13" fill="#aac0d1">EAR &lt; 0.30?</text></g>
+</g>
+<g stroke="#8ba5bc" stroke-width="3" fill="none" marker-end="url(#arrow)"><path d="M245 276H278"/><path d="M475 276H508"/><path d="M705 276H738"/><path d="M935 276H968"/></g>
+<path d="M1060 342V395H840V420" stroke="#e0a84e" stroke-width="3" fill="none" marker-end="url(#arrow)"/>
+<path d="M1060 342V395H380V420" stroke="#8ba5bc" stroke-width="3" fill="none" stroke-dasharray="7 7" marker-end="url(#arrow)"/>
+<g font-family="Arial,sans-serif" text-anchor="middle">
+  <rect x="280" y="430" width="200" height="94" rx="14" fill="#1c3a4c" stroke="#54758a"/><text x="380" y="468" font-size="18" font-weight="700" fill="#fff">Reset counter</text><text x="380" y="494" font-size="14" fill="#b3c8d8">Eyes open / EAR ≥ 0.30</text>
+  <rect x="730" y="430" width="220" height="94" rx="14" fill="#483b2b" stroke="#c99c54"/><text x="840" y="468" font-size="18" font-weight="700" fill="#fff">Count closed frames</text><text x="840" y="494" font-size="14" fill="#f1d5a3">Trigger after 100 frames</text>
+  <text x="600" y="566" font-size="14" fill="#9bb1c3">Prototype logic · thresholds are configurable in Sleepy Driver.py</text>
+</g>
+</svg>
