@@ -31,9 +31,12 @@ A relatively low EAR indicates that the eye is closed or nearly closed. This imp
 | `Sleepy Driver.py` | Main webcam-based drowsiness detection script |
 | `alarm.wav` | Audio alarm played when drowsiness is detected |
 | `environment.yml` | Conda environment for the Python dependencies |
-| `models/` | Local directory for the dlib facial landmark model (download required) |
+| `models/` | Directory for the two external model files (download required) |
 
-The OpenCV Haar cascade is loaded from the installed OpenCV package. The dlib landmark model is downloaded separately and is not stored in this repository.
+The model files are not committed to this repository. Both must be downloaded separately into `models/`:
+
+- `haarcascade_frontalface_default.xml` — OpenCV Haar cascade for face detection.
+- `shape_predictor_68_face_landmarks.dat` — dlib's 68-point facial landmark predictor.
 
 ## Requirements
 
@@ -46,7 +49,7 @@ The OpenCV Haar cascade is loaded from the installed OpenCV package. The dlib la
 
 ### macOS (Apple Silicon / M1, M2, M3, M4)
 
-The project supports macOS. The script uses paths relative to its own location, obtains the Haar cascade from the installed OpenCV package, and uses macOS's built-in `afplay` command for the alarm.
+The project supports macOS. Model paths are relative to the project directory, and macOS's built-in `afplay` command is used for alarm playback.
 
 #### 1. Install Miniforge
 
@@ -66,22 +69,29 @@ conda env create -f environment.yml
 conda activate drowsy-detection
 ```
 
-#### 4. Download the dlib facial landmark model
+#### 4. Download the required model files
 
-The program needs the 68-point landmark file. Run these commands from the repository directory:
+Run these commands from the repository directory:
 
 ```bash
 mkdir -p models
+
+# OpenCV face-detection cascade
+curl -L -o models/haarcascade_frontalface_default.xml \
+  https://raw.githubusercontent.com/opencv/opencv/4.x/data/haarcascades/haarcascade_frontalface_default.xml
+
+# dlib 68-point facial landmark predictor
 curl -L -o models/shape_predictor_68_face_landmarks.dat.bz2 \
   http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
 bzip2 -dk models/shape_predictor_68_face_landmarks.dat.bz2
 ```
 
-The extracted file should be located at:
+After downloading, your project should contain:
 
 ```text
 DrowsyDetection/
 ├── models/
+│   ├── haarcascade_frontalface_default.xml
 │   └── shape_predictor_68_face_landmarks.dat
 ├── alarm.wav
 └── Sleepy Driver.py
@@ -105,7 +115,7 @@ Install Python 3.10 and the dependencies listed in `environment.yml` using Conda
 python -m pip install playsound==1.2.2
 ```
 
-Then download the dlib landmark model as described above and run:
+Download both model files using the links above (the dlib model archive can be extracted using an appropriate archive utility), then run:
 
 ```bash
 python "Sleepy Driver.py"
