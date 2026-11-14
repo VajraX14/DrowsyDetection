@@ -1,4 +1,4 @@
-# Drowsy Detection
+# VigilDrive
 
 <p align="center">
   <strong>Real-time driver drowsiness detection using computer vision</strong><br>
@@ -17,7 +17,7 @@
 
 ## Overview
 
-**Drowsy Detection** is a Python-based computer vision application that monitors a driver's eyes through a webcam. It estimates whether the eyes remain closed for an extended sequence of frames and plays an audible alarm when the configured threshold is reached.
+**VigilDrive** is a Python-based computer vision application that monitors a driver's eyes through a webcam. It estimates whether the eyes remain closed for an extended sequence of frames and plays an audible alarm when the configured threshold is reached.
 
 The application combines OpenCV face detection with dlib's 68-point facial landmark predictor. It calculates the **Eye Aspect Ratio (EAR)** for both eyes and uses a consecutive-frame counter to identify prolonged eye closure.
 
@@ -63,7 +63,7 @@ The detection pipeline follows these steps:
 ### Detection pipeline
 
 <p align="center">
-  <img src="assets/detection-pipeline.svg" alt="Drowsy Detection processing pipeline" width="100%">
+  <img src="assets/detection-pipeline.svg" alt="VigilDrive processing pipeline" width="100%">
 </p>
 
 The flow is: webcam capture → frame pre-processing → face detection → landmark extraction → EAR calculation → consecutive-frame threshold → visual and audio alert.
@@ -113,14 +113,14 @@ The application treats the eyes as closed when the average EAR is below `EYE_THR
 ## Repository structure
 
 ```text
-DrowsyDetection/
+VigilDrive/
 ├── models/
 │   ├── haarcascade_frontalface_default.xml
 │   ├── shape_predictor_68_face_landmarks.dat
 │   └── shape_predictor_68_face_landmarks.dat.bz2
 ├── .vscode/
 │   └── settings.json
-├── Sleepy Driver.py
+├── VigilDrive.py
 ├── alarm.wav
 ├── environment.yml
 └── README.md
@@ -128,7 +128,7 @@ DrowsyDetection/
 
 | Path | Purpose |
 |---|---|
-| `Sleepy Driver.py` | Main application and drowsiness-detection loop |
+| `VigilDrive.py` | Main application and drowsiness-detection loop |
 | `models/haarcascade_frontalface_default.xml` | OpenCV Haar cascade face detector |
 | `models/shape_predictor_68_face_landmarks.dat` | dlib's pre-trained 68-point facial landmark model |
 | `models/shape_predictor_68_face_landmarks.dat.bz2` | Compressed copy of the landmark model |
@@ -153,15 +153,15 @@ Miniforge is a practical Conda distribution, particularly on Apple Silicon Macs.
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/VajraX14/DrowsyDetection.git
-cd DrowsyDetection
+git clone https://github.com/VajraX14/VigilDrive.git
+cd VigilDrive
 ```
 
 ### 2. Create and activate the environment
 
 ```bash
 conda env create -f environment.yml
-conda activate drowsy-detection
+conda activate vigildrive
 ```
 
 The supplied environment definition installs Python 3.10, dlib, OpenCV, SciPy, and imutils.
@@ -188,14 +188,14 @@ alarm.wav
 
 The application checks for these files before starting. The model files are already present in the repository; there is no need to download them again when cloning the current repository.
 
-### 5. (Optional) Add your webcam screenshots
+### Optional: Add your webcam screenshots
 
 Create an `assets/` directory if it does not already exist, place your genuine application captures there, and reference them from the Demo section. Avoid committing images that contain private or identifiable footage without consent.
 
 ### 5. Run the application
 
 ```bash
-python "Sleepy Driver.py"
+python "VigilDrive.py"
 ```
 
 Allow camera access when your operating system prompts you. On macOS, camera permissions can be reviewed under **System Settings → Privacy & Security → Camera**.
@@ -204,7 +204,7 @@ The live window displays the eye contours and current EAR. Press **q** while the
 
 ## Configuration
 
-The main configuration constants are defined near the beginning of `Sleepy Driver.py`.
+The main configuration constants are defined near the beginning of `VigilDrive.py`.
 
 | Parameter | Current value | Description |
 |---|---:|---|
