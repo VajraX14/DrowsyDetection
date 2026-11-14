@@ -1,4 +1,4 @@
-name: drowsy-detection
+name: vigildrive
 channels:
   - conda-forge
 dependencies:
