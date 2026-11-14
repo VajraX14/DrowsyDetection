@@ -33,12 +33,19 @@ Run the application with a working webcam to see the live detection window. The 
 
 **Add your own screenshots here** after running the application. Save genuine captures in an `assets/` directory and use the suggested filenames below.
 
-| Live webcam detection | Drowsiness alert |
-|---|---|
-| ![Live detection screenshot](assets/detection-demo.png) | ![Drowsiness alert screenshot](assets/drowsiness-alert.png) |
-| *Eye contours and live EAR value* | *Warning shown when the frame threshold is reached* |
+No genuine webcam screenshots are currently committed. To make the project page reflect the actual running application, capture two frames from your own webcam session and add them as:
 
-*The image paths above are placeholders until you add the corresponding screenshots to the repository.*
+- `assets/detection-demo.png` — live eye contours and EAR display.
+- `assets/drowsiness-alert.png` — the on-screen alert state.
+
+Then embed them here:
+
+```md
+![Live detection](assets/detection-demo.png)
+![Drowsiness alert](assets/drowsiness-alert.png)
+```
+
+The technical illustrations below are included in the repository and render immediately; they are not presented as application screenshots.
 
 ## How it works
 
@@ -55,29 +62,21 @@ The detection pipeline follows these steps:
 
 ### Detection pipeline
 
-```mermaid
-flowchart TD
-    A[Webcam frame] --> B[Resize and grayscale]
-    B --> C[Haar cascade face detection]
-    C --> D[68-point facial landmark prediction]
-    D --> E[Extract left and right eye landmarks]
-    E --> F[Calculate average EAR]
-    F --> G{EAR < threshold?}
-    G -- No --> H[Reset closed-eye counter]
-    G -- Yes --> I[Increment counter]
-    I --> J{Counter >= frame limit?}
-    J -- No --> K[Continue monitoring]
-    J -- Yes --> L[Display drowsiness warning]
-    L --> M[Play alarm.wav]
-    H --> K
-    M --> N[Reset counter]
-    N --> K
-    K --> A
-```
+<p align="center">
+  <img src="assets/detection-pipeline.svg" alt="Drowsy Detection processing pipeline" width="100%">
+</p>
+
+The flow is: webcam capture → frame pre-processing → face detection → landmark extraction → EAR calculation → consecutive-frame threshold → visual and audio alert.
+
+The same pipeline can also be viewed as a Mermaid flowchart in GitHub's Markdown renderer:
 
 ### Eye Aspect Ratio (EAR)
 
 The **Eye Aspect Ratio** measures the relative openness of an eye using six landmark points around its boundary.
+
+<p align="center">
+  <img src="assets/eye-aspect-ratio.svg" alt="Six eye landmarks used to calculate Eye Aspect Ratio" width="100%">
+</p>
 
 For eye landmarks (p_1, p_2, \ldots, p_6):
 
@@ -188,6 +187,10 @@ alarm.wav
 ```
 
 The application checks for these files before starting. The model files are already present in the repository; there is no need to download them again when cloning the current repository.
+
+### 5. (Optional) Add your webcam screenshots
+
+Create an `assets/` directory if it does not already exist, place your genuine application captures there, and reference them from the Demo section. Avoid committing images that contain private or identifiable footage without consent.
 
 ### 5. Run the application
 
