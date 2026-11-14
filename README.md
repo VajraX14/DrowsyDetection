@@ -68,7 +68,7 @@ The detection pipeline follows these steps:
 
 The flow is: webcam capture → frame pre-processing → face detection → landmark extraction → EAR calculation → consecutive-frame threshold → visual and audio alert.
 
-The same pipeline can also be viewed as a Mermaid flowchart in GitHub's Markdown renderer:
+The illustration is an overview of the processing stages; the implementation details and configurable values are documented below.
 
 ### Eye Aspect Ratio (EAR)
 
