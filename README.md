@@ -26,116 +26,119 @@ A relatively low EAR indicates that the eye is closed or nearly closed. This imp
 
 ## Repository contents
 
-| File | Description |
+| File or directory | Description |
 |---|---|
 | `Sleepy Driver.py` | Main webcam-based drowsiness detection script |
-| `alarm.wav` | Audio alarm played when the drowsiness threshold is reached |
+| `alarm.wav` | Audio alarm played when drowsiness is detected |
+| `environment.yml` | Conda environment for the Python dependencies |
+| `models/` | Local directory for the dlib facial landmark model (download required) |
 
-The script also requires two external model files that are **not currently included** in this repository:
-
-- `haarcascade_frontalface_default.xml` — OpenCV Haar cascade for face detection.
-- `shape_predictor_68_face_landmarks.dat` — dlib's 68 facial landmark predictor.
+The OpenCV Haar cascade is loaded from the installed OpenCV package. The dlib landmark model is downloaded separately and is not stored in this repository.
 
 ## Requirements
 
-- Python 3
-- A working webcam
-- Speakers or headphones for the alarm
-- The Python packages:
-  - OpenCV (`opencv-python`)
-  - dlib
-  - imutils
-  - SciPy
-  - playsound
+- Python 3.10 (recommended for the supplied Conda environment)
+- A webcam
+- Speakers or headphones
+- Conda / Miniforge (recommended, particularly on Apple Silicon)
 
 ## Setup
 
-### 1. Clone the repository
+### macOS (Apple Silicon / M1, M2, M3, M4)
+
+The project supports macOS. The script uses paths relative to its own location, obtains the Haar cascade from the installed OpenCV package, and uses macOS's built-in `afplay` command for the alarm.
+
+#### 1. Install Miniforge
+
+Download and install the **Apple Silicon** installer from [conda-forge / Miniforge](https://conda-forge.org/download/). After installation, close and reopen Terminal.
+
+#### 2. Clone the repository
 
 ```bash
 git clone https://github.com/VajraX14/DrowsyDetection.git
 cd DrowsyDetection
 ```
 
-### 2. Create and activate a virtual environment (recommended)
-
-macOS / Linux:
+#### 3. Create the environment
 
 ```bash
-python3 -m venv .venv
-source .venv/bin/activate
+conda env create -f environment.yml
+conda activate drowsy-detection
 ```
 
-Windows PowerShell:
+#### 4. Download the dlib facial landmark model
 
-```powershell
-py -m venv .venv
-.venv\Scripts\Activate.ps1
-```
-
-### 3. Install dependencies
+The program needs the 68-point landmark file. Run these commands from the repository directory:
 
 ```bash
-python -m pip install --upgrade pip
-python -m pip install opencv-python dlib imutils scipy playsound
+mkdir -p models
+curl -L -o models/shape_predictor_68_face_landmarks.dat.bz2 \
+  http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2
+bzip2 -dk models/shape_predictor_68_face_landmarks.dat.bz2
 ```
 
-**Note:** dlib may require additional build tools depending on your operating system and Python version. Installation can be more involved than the other packages.
+The extracted file should be located at:
 
-### 4. Download the required model files
-
-Download the dlib 68-point facial landmark predictor from the [dlib model files](http://dlib.net/files/shape_predictor_68_face_landmarks.dat.bz2) page and extract the `.dat` file.
-
-The Haar cascade is distributed with OpenCV. You can locate it from your Python environment:
-
-```python
-import cv2
-print(cv2.data.haarcascades)
+```text
+DrowsyDetection/
+├── models/
+│   └── shape_predictor_68_face_landmarks.dat
+├── alarm.wav
+└── Sleepy Driver.py
 ```
 
-The required file is `haarcascade_frontalface_default.xml`. Alternatively, obtain it from the [OpenCV repository](https://github.com/opencv/opencv/tree/master/data/haarcascades).
-
-Place both model files in a convenient local directory. The current script contains absolute Windows paths, so **update the paths in `Sleepy Driver.py`** to match your machine before running it. In particular, update the paths used to initialise the face detector, landmark predictor, and alarm file. The alarm file is already present in this repository.
-
-## Run
-
-From the repository directory, with your virtual environment active:
+#### 5. Run the application
 
 ```bash
 python "Sleepy Driver.py"
 ```
 
-The script opens a webcam window and displays the calculated EAR. Press **q** while the video window is active to stop the application.
+When macOS asks for camera access, allow access for the application running Python (for example, Terminal). You can review this under **System Settings → Privacy & Security → Camera**.
+
+The webcam window displays the detected eye contours and current EAR. Press **q** while the webcam window is active to quit.
+
+### Windows / Linux
+
+Install Python 3.10 and the dependencies listed in `environment.yml` using Conda. On Windows and Linux, the script uses the `playsound` package for alarm playback, so install it in the environment:
+
+```bash
+python -m pip install playsound==1.2.2
+```
+
+Then download the dlib landmark model as described above and run:
+
+```bash
+python "Sleepy Driver.py"
+```
 
 ## Configuration
 
-The main detection parameters are defined near the beginning of `Sleepy Driver.py`:
+The main parameters are defined near the top of `Sleepy Driver.py`:
 
-| Parameter | Current value | Purpose |
+| Parameter | Default | Purpose |
 |---|---:|---|
-| `eye_threshold` | `0.3` | EAR below which an eye is treated as closed |
-| `frames_limit` | `50` | Number of consecutive low-EAR frames before the alarm is triggered |
-| `VideoStream(src=0)` | `0` | Webcam device index |
+| `EYE_THRESHOLD` | `0.30` | EAR below which an eye is treated as closed |
+| `FRAMES_LIMIT` | `50` | Consecutive low-EAR frames before the alarm is triggered |
+| `CAMERA_INDEX` | `0` | Webcam device index |
 
-These are prototype defaults, not universal values. Results depend on camera position, lighting, face orientation, frame rate, and individual facial characteristics. Changing the threshold or frame limit may affect false-positive and false-negative rates.
+These are prototype defaults, not universal values. Results depend on camera position, lighting, face orientation, frame rate, and individual facial characteristics.
 
 ## Limitations
 
-- The current implementation uses a fixed EAR threshold and consecutive-frame counter.
+- The implementation uses a fixed EAR threshold and consecutive-frame counter.
 - Face and eye landmark detection may be unreliable in poor lighting, with occlusions, or when the driver's face is turned away.
-- The alarm is played synchronously, which may interrupt frame processing while the sound is playing.
+- Alarm playback is synchronous and can pause frame processing while the sound plays.
 - Camera index `0` assumes the default webcam is the intended input.
-- The script currently uses absolute Windows file paths and needs path updates for other machines.
 - The project has not been validated as a safety-critical system.
+- The 68-point dlib model is trained using the iBUG 300-W dataset; its dataset terms exclude commercial use without obtaining appropriate permission. Review the [dlib model documentation](https://github.com/davisking/dlib-models) before any commercial use.
 
 ## Potential improvements
 
-- Replace machine-specific paths with configurable, cross-platform paths.
-- Add a `requirements.txt` and configuration file.
-- Separate alarm playback from the video-processing loop.
-- Add calibration or temporal smoothing to make detection more robust.
-- Handle missing camera, model files, and face-detection failures gracefully.
-- Add tests and document evaluation against representative lighting, camera, and user conditions.
+- Add calibration and temporal smoothing to improve robustness.
+- Run alarm playback asynchronously so video processing is not blocked.
+- Add camera selection and better handling of camera/model loading errors.
+- Add automated tests and evaluate performance across lighting, camera, and user conditions.
+- Consider a more robust face and eye tracking approach.
 
 ## Contributing
 
