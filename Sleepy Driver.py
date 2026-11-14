@@ -1,91 +1,159 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Thu Apr 16 00:51:21 2020
-@author: Samridh
-"""
+"""Webcam-based driver drowsiness detection using eye aspect ratio (EAR)."""
 
-from scipy.spatial import distance as dist
-from imutils.video import VideoStream
-from imutils import face_utils
-import playsound
-import imutils
+from pathlib import Path
+import sys
 import time
-import dlib
+
 import cv2
+import dlib
+import imutils
+from imutils import face_utils
+from imutils.video import VideoStream
+from scipy.spatial import distance as dist
 
-def sound_alarm(path):
-	playsound.playsound(path)
+# macOS has a built-in audio player (afplay). Keep playsound for other OSes.
+if sys.platform != "darwin":
+    import playsound
 
-def EAR(eye):
-	A = dist.euclidean(eye[1], eye[5])
-	B = dist.euclidean(eye[2], eye[4])
-	C = dist.euclidean(eye[0], eye[3])
-	ear = (A + B) / (2.0 * C)
-	return ear
 
-eye_threshold=0.3
-frames_limit=50
-count=0
+BASE_DIR = Path(__file__).resolve().parent
+MODEL_DIR = BASE_DIR / "models"
+FACE_CASCADE_PATH = Path(cv2.data.haarcascades) / "haarcascade_frontalface_default.xml"
+PREDICTOR_PATH = MODEL_DIR / "shape_predictor_68_face_landmarks.dat"
+ALARM_PATH = BASE_DIR / "alarm.wav"
 
-print("[INFO] loading facial landmark predictor...")
+EYE_THRESHOLD = 0.30
+FRAMES_LIMIT = 50
+CAMERA_INDEX = 0
 
-detector = cv2.CascadeClassifier(r"C:\Users\samri\Desktop\Project\Sleepy Driver Alert Detection [Python, OpenCV]\Resources\haarcascade_frontalface_default.xml")
-predictor = dlib.shape_predictor(r"C:\Users\samri\Desktop\Project\Sleepy Driver Alert Detection [Python, OpenCV]\Resources\shape_predictor_68_face_landmarks.dat")
-(lStart, lEnd) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
-(rStart, rEnd) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-print("[INFO] starting video stream thread...")
+def sound_alarm(path: Path) -> None:
+    """Play the alarm using the operating system's available audio player."""
+    if sys.platform == "darwin":
+        import subprocess
 
-vs = VideoStream(src=0).start()
-time.sleep(1.0)
+        subprocess.run(["afplay", str(path)], check=False)
+    else:
+        playsound.playsound(str(path))
 
-while True:
-# Frame is then preprocessed by resizing it to have a width of '450 pixels' and converting it to grayscale
-	frame = vs.read()
-	frame = imutils.resize(frame, width=450)
-	gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
 
-# dlib’s face detector to find and locate the face(s) in the image.
-	rects = detector.detectMultiScale(gray, scaleFactor=1.1,
-		minNeighbors=5, minSize=(30, 30),
-		flags=cv2.CASCADE_SCALE_IMAGE)
+def eye_aspect_ratio(eye) -> float:
+    """Calculate the eye aspect ratio from six eye landmark coordinates."""
+    vertical_a = dist.euclidean(eye[1], eye[5])
+    vertical_b = dist.euclidean(eye[2], eye[4])
+    horizontal = dist.euclidean(eye[0], eye[3])
 
-	for (x, y, w, h) in rects:
-		rect = dlib.rectangle(int(x), int(y), int(x + w), int(y + h))
-		shape= predictor(gray, rect)
-		shape= face_utils.shape_to_np(shape)
+    if horizontal == 0:
+        return 0.0
 
-		leftEye= shape[lStart:lEnd]
-		rightEye= shape[rStart:rEnd]
-		leftEAR= EAR(leftEye)
-		rightEAR= EAR(rightEye)
+    return (vertical_a + vertical_b) / (2.0 * horizontal)
 
-		ear=(leftEAR+rightEAR)/2.0
 
-		leftEyeHull= cv2.convexHull(leftEye)
-		rightEyeHull= cv2.convexHull(rightEye)
+def main() -> None:
+    if not FACE_CASCADE_PATH.is_file():
+        raise FileNotFoundError(
+            f"OpenCV Haar cascade not found: {FACE_CASCADE_PATH}"
+        )
+    if not PREDICTOR_PATH.is_file():
+        raise FileNotFoundError(
+            "Missing dlib landmark model. Download and extract "
+            "'shape_predictor_68_face_landmarks.dat' into the 'models' folder. "
+            f"Expected location: {PREDICTOR_PATH}"
+        )
+    if not ALARM_PATH.is_file():
+        raise FileNotFoundError(f"Alarm audio file not found: {ALARM_PATH}")
 
-		cv2.drawContours(frame, [leftEyeHull], -1, (0, 255, 0), 1)
-		cv2.drawContours(frame, [rightEyeHull], -1, (0, 255, 0), 1)
+    print("[INFO] Loading face detector and facial landmark predictor...")
 
-		if ear<eye_threshold:
-			count+=1
+    detector = cv2.CascadeClassifier(str(FACE_CASCADE_PATH))
+    if detector.empty():
+        raise RuntimeError("OpenCV could not load the Haar cascade classifier.")
 
-			if count>=frames_limit:
+    predictor = dlib.shape_predictor(str(PREDICTOR_PATH))
+    (left_start, left_end) = face_utils.FACIAL_LANDMARKS_IDXS["left_eye"]
+    (right_start, right_end) = face_utils.FACIAL_LANDMARKS_IDXS["right_eye"]
 
-				sound_alarm(r"C:\Users\samri\Desktop\Project\Sleepy Driver Alert Detection [Python, OpenCV]\alarm.wav")
-				cv2.putText(frame, "DROWSINESS ALERT!", (10, 30),
-					cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
-		else:
-			count=0
+    print("[INFO] Starting webcam...")
+    video_stream = VideoStream(src=CAMERA_INDEX).start()
+    time.sleep(1.0)
 
-		cv2.putText(frame, "EAR: {:.2f}".format(ear), (300, 30),
-			cv2.FONT_HERSHEY_SIMPLEX, 0.7, (0, 0, 255), 2)
- 
-	cv2.imshow("Frame", frame)
-	key = cv2.waitKey(1) & 0xFF
-	if key == ord("q"):
-		break
+    closed_eye_frames = 0
 
-cv2.destroyAllWindows()
-vs.stop()
+    try:
+        while True:
+            frame = video_stream.read()
+            if frame is None:
+                print("[ERROR] Could not read a frame from the webcam.")
+                break
+
+            frame = imutils.resize(frame, width=450)
+            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+
+            faces = detector.detectMultiScale(
+                gray,
+                scaleFactor=1.1,
+                minNeighbors=5,
+                minSize=(30, 30),
+                flags=cv2.CASCADE_SCALE_IMAGE,
+            )
+
+            for (x, y, width, height) in faces:
+                face_rect = dlib.rectangle(
+                    int(x), int(y), int(x + width), int(y + height)
+                )
+                landmarks = predictor(gray, face_rect)
+                landmarks = face_utils.shape_to_np(landmarks)
+
+                left_eye = landmarks[left_start:left_end]
+                right_eye = landmarks[right_start:right_end]
+
+                left_ear = eye_aspect_ratio(left_eye)
+                right_ear = eye_aspect_ratio(right_eye)
+                ear = (left_ear + right_ear) / 2.0
+
+                left_hull = cv2.convexHull(left_eye)
+                right_hull = cv2.convexHull(right_eye)
+                cv2.drawContours(frame, [left_hull], -1, (0, 255, 0), 1)
+                cv2.drawContours(frame, [right_hull], -1, (0, 255, 0), 1)
+
+                if ear < EYE_THRESHOLD:
+                    closed_eye_frames += 1
+                    if closed_eye_frames >= FRAMES_LIMIT:
+                        cv2.putText(
+                            frame,
+                            "DROWSINESS ALERT!",
+                            (10, 30),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.7,
+                            (0, 0, 255),
+                            2,
+                        )
+                        sound_alarm(ALARM_PATH)
+                        closed_eye_frames = 0
+                else:
+                    closed_eye_frames = 0
+
+                cv2.putText(
+                    frame,
+                    f"EAR: {ear:.2f}",
+                    (300, 30),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 0, 255),
+                    2,
+                )
+
+            cv2.imshow("Drowsiness Detection", frame)
+
+            if cv2.waitKey(1) & 0xFF == ord("q"):
+                break
+
+    finally:
+        cv2.destroyAllWindows()
+        video_stream.stop()
+        print("[INFO] Drowsiness detection stopped.")
+
+
+if __name__ == "__main__":
+    main()
