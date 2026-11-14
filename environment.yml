@@ -1,0 +1,9 @@
+name: drowsy-detection
+channels:
+  - conda-forge
+dependencies:
+  - python=3.10
+  - dlib
+  - opencv
+  - scipy
+  - imutils
