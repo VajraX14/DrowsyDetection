@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="430" viewBox="0 0 1000 430" role="img" aria-labelledby="title desc">
+<title id="title">Eye Aspect Ratio landmark illustration</title>
+<desc id="desc">A stylized eye outline with six labeled landmarks. The horizontal distance between points one and four and the two vertical distances define the eye aspect ratio.</desc>
+<defs>
+ <linearGradient id="panel" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#f6fbff"/><stop offset="1" stop-color="#e9f2f8"/></linearGradient>
+ <marker id="measure" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto-start-reverse"><path d="M0 0L8 4L0 8Z" fill="#3184a9"/></marker>
+</defs>
+<rect width="1000" height="430" rx="24" fill="url(#panel)"/>
+<text x="48" y="55" font-family="Arial,sans-serif" font-size="15" font-weight="700" letter-spacing="2" fill="#247b84">THE EYE ASPECT RATIO</text>
+<text x="48" y="91" font-family="Arial,sans-serif" font-size="27" font-weight="700" fill="#183448">Six landmarks describe eye openness</text>
+<path d="M145 245 Q390 42 635 245 Q390 448 145 245Z" fill="#fff" stroke="#274e68" stroke-width="5"/>
+<path d="M145 245 Q390 42 635 245" fill="none" stroke="#274e68" stroke-width="5"/>
+<path d="M145 245 Q390 448 635 245" fill="none" stroke="#274e68" stroke-width="5"/>
+<ellipse cx="390" cy="245" rx="66" ry="66" fill="#d8edf2" stroke="#3999a7" stroke-width="4"/>
+<circle cx="390" cy="245" r="36" fill="#244e69"/><circle cx="404" cy="231" r="11" fill="#fff"/>
+<g stroke="#d18b30" stroke-width="3" stroke-dasharray="7 6" fill="none">
+ <path d="M145 245L635 245"/><path d="M225 178L245 315"/><path d="M535 178L515 315"/>
+</g>
+<g fill="#d18b30" stroke="#fff" stroke-width="3">
+ <circle cx="145" cy="245" r="10"/><circle cx="245" cy="150" r="10"/><circle cx="535" cy="150" r="10"/><circle cx="635" cy="245" r="10"/><circle cx="515" cy="340" r="10"/><circle cx="265" cy="340" r="10"/>
+</g>
+<g font-family="Arial,sans-serif" font-size="17" font-weight="700" fill="#183448">
+ <text x="112" y="226">p1</text><text x="222" y="126">p2</text><text x="540" y="126">p3</text><text x="648" y="250">p4</text><text x="525" y="372">p5</text><text x="236" y="372">p6</text>
+</g>
+<g stroke="#3184a9" stroke-width="3" fill="none" marker-start="url(#measure)" marker-end="url(#measure)">
+ <path d="M145 397H635"/><path d="M705 150V340"/>
+</g>
+<g font-family="Arial,sans-serif" fill="#24566c">
+ <text x="390" y="421" text-anchor="middle" font-size="16" font-weight="700">Horizontal width: ||p1 − p4||</text>
+ <text x="735" y="225" font-size="16" font-weight="700">Vertical distances</text>
+ <text x="735" y="252" font-size="16">||p2 − p6||</text>
+ <text x="735" y="279" font-size="16">||p3 − p5||</text>
+ <text x="735" y="325" font-size="15" fill="#55778a">Illustrative geometry</text>
+ <text x="735" y="348" font-size="15" fill="#55778a">not a captured video frame</text>
+</g>
+</svg>
